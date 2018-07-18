@@ -12,7 +12,7 @@ class LeapListener extends Listener
 {
 	private static SerialPort p = SerialPort.getCommPort("COM3");
 	private Vector targetPoint;
-	private double alpha = 0.40;
+	private double alpha = 0.60;
 	private double filtered_proximity = 0.0;
 	private String trial_type;
 	private double previous_proximity = 0.0;
@@ -89,9 +89,12 @@ class LeapListener extends Listener
 		//System.out.println("Box depth: " + ib.depth());
 		
 		//Isolate end of middle finger, store position as vector
-		FingerList fingers = frame.fingers();
-		Bone bone = fingers.get(2).bone(Bone.Type.TYPE_DISTAL);
-		Vector tracking = bone.nextJoint();
+		//FingerList fingers = frame.fingers();
+		//Bone bone = fingers.get(2).bone(Bone.Type.TYPE_DISTAL);
+		
+		HandList hands = frame.hands();
+		Hand hand = hands.get(0);
+		Vector tracking = hand.palmPosition();
 		
 		//proximity of finger tip to target
 		float proximity = tracking.distanceTo(targetPoint);
@@ -103,7 +106,7 @@ class LeapListener extends Listener
 		float sphereRadius = 150;
 		float closenessPercentage = (float) (filtered_proximity / sphereRadius) * 100;
 		
-		if (closenessPercentage > 100) {
+		if (filtered_proximity > sphereRadius) {
 			closenessPercentage = 0; //score is 0 if user's finger tip is outside sphere's radius
 		}
 		
@@ -116,11 +119,11 @@ class LeapListener extends Listener
 		//System.out.println("-------------------------------------");
 		//System.out.printf("%05.1f,%05.1f\n", proximity, filtered_proximity);
 		
-		if (trial_type.equals("b") && ((filtered_proximity >= previous_proximity + 10 || filtered_proximity <= previous_proximity - 10)))
+		if (trial_type.equals("b") && ((filtered_proximity >= previous_proximity + 5 || filtered_proximity <= previous_proximity - 5)))
 		{
 			updateBrightness(closenessPercentage);
 		}
-		else if (trial_type.equals("c") && ((filtered_proximity >= previous_proximity + 10 || filtered_proximity <= previous_proximity - 10))) 
+		else if (trial_type.equals("c") && ((filtered_proximity >= previous_proximity + 5 || filtered_proximity <= previous_proximity - 5))) 
 		{
 			updateColour(closenessPercentage);
 		}
@@ -190,7 +193,7 @@ class LeapListener extends Listener
 	}
 	
 	public float simple_interpolate(int a, int b, float pct) {
-	    return a + (b - a) * pct;
+	    return a + (b - a) * (pct/100);
 	}
 }
 
