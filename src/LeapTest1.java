@@ -104,7 +104,7 @@ class LeapListener extends Listener
 		
 		//define a radius around the target point and calculate closeness score within boundary of this area
 		float sphereRadius = 150;
-		float closenessPercentage = (float) (filtered_proximity / sphereRadius) * 100;
+		float closenessPercentage = (float) (100 - ((filtered_proximity / sphereRadius) * 100));
 		
 		if (filtered_proximity > sphereRadius) {
 			closenessPercentage = 0; //score is 0 if user's finger tip is outside sphere's radius
