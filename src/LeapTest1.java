@@ -16,6 +16,7 @@ class LeapListener extends Listener
 	private double filtered_proximity = 0.0;
 	private String trial_type;
 	private double previous_proximity = 0.0;
+	private InteractionBox ib;
 	
 	public void onInit(Controller controller) {
 		//Establish trial type: brightness ("b"), colour ("c"), or position ("p")
@@ -83,7 +84,7 @@ class LeapListener extends Listener
 		Frame frame = controller.frame(); //frame from the controller
 		
 		//Interaction box measurements
-		//InteractionBox ib = frame.interactionBox();
+		ib = frame.interactionBox();
 		//System.out.println("Box height: " + ib.height());
 		//System.out.println("Box width: " + ib.width());
 		//System.out.println("Box depth: " + ib.depth());
@@ -129,7 +130,7 @@ class LeapListener extends Listener
 		}
 		else if (trial_type.equals("p")) 
 		{
-			//yet to implement position feedback
+			updatePosition(closenessPercentage, tracking);
 		}
 		else 
 		{
@@ -190,6 +191,29 @@ class LeapListener extends Listener
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	public void updatePosition(float pct, Vector handPosition) 
+	{
+		String positionCmd = "1";
+		OutputStream output = p.getOutputStream();
+		
+		//Working on this - need to check documentation on angleTo function
+		float angleToCentre = handPosition.angleTo(ib.center());
+		int LED_Number = (int) ((angleToCentre/60) * 10);
+		System.out.println(angleToCentre/60 * 10);
+		/*
+		positionCmd += " " + Integer.toString(LED_Number) + " " + "255" + " " + "255" + " " + "255";
+		
+		try 
+		{
+			output.write(positionCmd.getBytes());
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		*/
 	}
 	
 	public float simple_interpolate(int a, int b, float pct) {
