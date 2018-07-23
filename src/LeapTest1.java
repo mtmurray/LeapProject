@@ -17,6 +17,7 @@ class LeapListener extends Listener
 	private String trial_type;
 	private double previous_proximity = 0.0;
 	private InteractionBox ib;
+	private int previousLED = 0;
 	
 	public void onInit(Controller controller) {
 		//Establish trial type: brightness ("b"), colour ("c"), or position ("p")
@@ -181,7 +182,7 @@ class LeapListener extends Listener
 		int newR = (int) simple_interpolate(r1, r2, pct);
 		int newG = (int) simple_interpolate(g1, g2, pct);
 		
-		colourCmd += " " + Integer.toString(newR) + " " + Integer.toString(newG) + " " + Integer.toString(blue);
+		colourCmd += " " + Integer.toString(newR) + " " + Integer.toString(newG) + " " + Integer.toString(blue) + "\n";
 		
 		try 
 		{
@@ -195,15 +196,46 @@ class LeapListener extends Listener
 	
 	public void updatePosition(float pct, Vector handPosition) 
 	{
-		String positionCmd = "1";
+		String positionCmd = "9";
 		OutputStream output = p.getOutputStream();
+		Vector centre = ib.center();
 		
-		//Working on this - need to check documentation on angleTo function
-		float angleToCentre = handPosition.angleTo(ib.center());
-		int LED_Number = (int) ((angleToCentre/60) * 10);
-		System.out.println(angleToCentre/60 * 10);
-		/*
-		positionCmd += " " + Integer.toString(LED_Number) + " " + "255" + " " + "255" + " " + "255";
+		/*Envisage 2D circle around device (on table) - y coordinate of 
+		 * vector (height) is not relevant. Z coordinate of 
+		 * vector effectively becomes Y coordinate of hand within aforementioned 
+		 * 2D circle. */
+		
+		//get coordinates for hand, centre, and target - only X and Z necessary when working in 2D circle
+		double handX = handPosition.getX();
+		double handZ = handPosition.getZ();
+		double centreX = centre.getX();
+		double centreZ = centre.getZ();
+		double targetX = targetPoint.getX();
+		double targetZ = targetPoint.getZ();
+		
+		//angle of hand and target point relative to centre of 2D circle
+		float handAngle = (float) (Math.toDegrees((Math.atan2(handZ - centreZ, handX - centreX))));
+		float targetAngle = (float) (Math.toDegrees((Math.atan2(targetZ - centreZ, targetX - centreX))));
+		
+		//if hand or target angles are less than 0, convert so they range between 360 and 180
+		if (handAngle < 0) 
+		{
+			handAngle = 360 + handAngle;
+		}
+		
+		if (targetAngle < 0) 
+		{
+			targetAngle = 360 + targetAngle;
+		}
+		
+		//get LED numbers for hand position and target position
+		float h = (handAngle/60) * 10;
+		float t = (targetAngle/60) * 10;
+		int handLED = Math.round(h);
+		int targetLED = Math.round(t);
+		int rgbMax = 255;
+		
+		positionCmd += " " + Integer.toString(handLED) + "\n";
 		
 		try 
 		{
@@ -213,7 +245,8 @@ class LeapListener extends Listener
 		{
 			e.printStackTrace();
 		}
-		*/
+		
+		previousLED = handLED;
 	}
 	
 	public float simple_interpolate(int a, int b, float pct) {
