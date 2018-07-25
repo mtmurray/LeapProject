@@ -1,10 +1,8 @@
 import java.io.IOException;
 import java.io.OutputStream;
-
 import com.fazecast.jSerialComm.*;
 import java.util.Random;
 import java.util.Scanner;
-
 import com.leapmotion.leap.*;
 import com.leapmotion.leap.Gesture.State;
 
@@ -17,7 +15,8 @@ class LeapListener extends Listener
 	private String trial_type;
 	private double previous_proximity = 0.0;
 	private InteractionBox ib;
-	private int previousLED = 0;
+	private float prevCloseness = 0;
+	private long currentTime;
 	
 	public void onInit(Controller controller) {
 		//Establish trial type: brightness ("b"), colour ("c"), or position ("p")
@@ -129,7 +128,7 @@ class LeapListener extends Listener
 		{
 			updateColour(closenessPercentage);
 		}
-		else if (trial_type.equals("p")) 
+		else if (trial_type.equals("p") && ((closenessPercentage >= prevCloseness + 10 || closenessPercentage <= prevCloseness - 10))) 
 		{
 			updatePosition(closenessPercentage, tracking);
 		}
@@ -140,6 +139,7 @@ class LeapListener extends Listener
 		
 		//set current trial's proximity to act as previous proximity during next trial
 		previous_proximity = filtered_proximity;
+		prevCloseness = closenessPercentage;
 	}
 	
 	public void updateBrightness(float pct)
@@ -233,20 +233,21 @@ class LeapListener extends Listener
 		float t = (targetAngle/60) * 10;
 		int handLED = Math.round(h);
 		int targetLED = Math.round(t);
-		int rgbMax = 255;
 		
 		positionCmd += " " + Integer.toString(handLED) + "\n";
 		
 		try 
 		{
 			output.write(positionCmd.getBytes());
+			currentTime = System.currentTimeMillis();
+			System.out.println(currentTime);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
 		
-		previousLED = handLED;
+		//previousLED = handLED;
 	}
 	
 	public float simple_interpolate(int a, int b, float pct) {
