@@ -16,7 +16,8 @@ class LeapListener extends Listener
 	private double previous_proximity = 0.0;
 	private InteractionBox ib;
 	private float prevCloseness = 0;
-	private long currentTime;
+	//private long currentTime;
+	//private long prevTime;
 	
 	public void onInit(Controller controller) {
 		//Establish trial type: brightness ("b"), colour ("c"), or position ("p")
@@ -31,6 +32,17 @@ class LeapListener extends Listener
 		try {
 			Thread.sleep(5000); //wait for 5 seconds
 		}catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		OutputStream output = p.getOutputStream();
+		
+		try 
+		{
+			output.write("3".getBytes());
+		} 
+		catch (IOException e) 
+		{
 			e.printStackTrace();
 		}
 		
@@ -128,7 +140,7 @@ class LeapListener extends Listener
 		{
 			updateColour(closenessPercentage);
 		}
-		else if (trial_type.equals("p") && ((closenessPercentage >= prevCloseness + 10 || closenessPercentage <= prevCloseness - 10))) 
+		else if (trial_type.equals("p") && ((filtered_proximity >= previous_proximity + 3 || filtered_proximity <= previous_proximity - 3))) 
 		{
 			updatePosition(closenessPercentage, tracking);
 		}
@@ -239,13 +251,13 @@ class LeapListener extends Listener
 		try 
 		{
 			output.write(positionCmd.getBytes());
-			currentTime = System.currentTimeMillis();
-			System.out.println(currentTime);
 		}
 		catch (IOException e)
 		{
 			e.printStackTrace();
 		}
+		
+		//prevTime = currentTime;
 		
 		//previousLED = handLED;
 	}
