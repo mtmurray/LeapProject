@@ -246,7 +246,17 @@ class LeapListener extends Listener
 		int handLED = Math.round(h);
 		int targetLED = Math.round(t);
 		
-		positionCmd += " " + Integer.toString(handLED) + "\n";
+		//blue = 0
+		// r1 = 255
+		// g1 = 0
+		// r2 = 0
+		// g2 = 255
+		
+		int r = (int) simple_interpolate(255, 0, pct);
+		int g = (int) simple_interpolate(0, 255, pct);
+		int b = 0;
+		
+		positionCmd += " " + Integer.toString(handLED) + " " + Integer.toString(targetLED) + " " + Integer.toString(r) + " " + Integer.toString(g) + " " + Integer.toString(b) + "\n";
 		
 		try 
 		{
@@ -257,9 +267,6 @@ class LeapListener extends Listener
 			e.printStackTrace();
 		}
 		
-		//prevTime = currentTime;
-		
-		//previousLED = handLED;
 	}
 	
 	public float simple_interpolate(int a, int b, float pct) {
