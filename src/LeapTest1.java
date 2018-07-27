@@ -16,8 +16,8 @@ class LeapListener extends Listener
 	private double previous_proximity = 0.0;
 	private InteractionBox ib;
 	private float prevCloseness = 0;
-	//private long currentTime;
-	//private long prevTime;
+	private long startTime;
+	private double trialTime;
 	
 	public void onInit(Controller controller) {
 		//Establish trial type: brightness ("b"), colour ("c"), or position ("p")
@@ -70,7 +70,7 @@ class LeapListener extends Listener
 	}
 	
 	public void onConnect(Controller controller) {
-		//System.out.println("Connected to sensor");
+		startTime = System.currentTimeMillis();
 	}
 	
 	public void onDisconnect(Controller controller) {
@@ -89,6 +89,10 @@ class LeapListener extends Listener
 		{
 			e.printStackTrace();
 		}
+		
+		double t = Math.round((System.currentTimeMillis() - startTime));
+		trialTime = t/1000;
+		System.out.println(trialTime);
 	}
 	
 	public void onFrame(Controller controller) {
@@ -245,12 +249,6 @@ class LeapListener extends Listener
 		float t = (targetAngle/60) * 10;
 		int handLED = Math.round(h);
 		int targetLED = Math.round(t);
-		
-		//blue = 0
-		// r1 = 255
-		// g1 = 0
-		// r2 = 0
-		// g2 = 255
 		
 		int r = (int) simple_interpolate(255, 0, pct);
 		int g = (int) simple_interpolate(0, 255, pct);
