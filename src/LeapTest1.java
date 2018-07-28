@@ -4,7 +4,6 @@ import com.fazecast.jSerialComm.*;
 import java.util.Random;
 import java.util.Scanner;
 import com.leapmotion.leap.*;
-import com.leapmotion.leap.Gesture.State;
 
 class LeapListener extends Listener
 {
@@ -79,6 +78,10 @@ class LeapListener extends Listener
 	
 	public void onExit(Controller controller) {
 		
+		double t = Math.round((System.currentTimeMillis() - startTime));
+		trialTime = t/1000;
+		//System.out.println(trialTime);
+		
 		OutputStream output = p.getOutputStream();
 		
 		try 
@@ -90,9 +93,34 @@ class LeapListener extends Listener
 			e.printStackTrace();
 		}
 		
-		double t = Math.round((System.currentTimeMillis() - startTime));
-		trialTime = t/1000;
-		System.out.println(trialTime);
+		System.out.println("Enter participant ID: ");
+		Scanner s = new Scanner(System.in);
+		int pID = s.nextInt();
+		
+		String dataFile = String.format("P%d.csv", pID);
+		Logger l = new Logger(dataFile);
+		
+		if (!FileManager.fileExists(dataFile)) {
+		    if (!l.write("ParticipantID,TrialNo,Condition,TimeTaken,Proximity")) {
+		        System.err.println("Warning: unable to write to log file");
+		    }
+		}
+		
+		l.write(String.format("%d,%d,%s,%.2f,%.2f", pID, 0, trial_type, trialTime, filtered_proximity));
+		
+		/*
+		try 
+		{
+			FileWriter writer = new FileWriter("ThesisData.csv");
+			String message = String.format("%d, %d, %s, %.2f, %.2f", pID, 0, trial_type, trialTime, filtered_proximity);
+			writer.append(message + "\n");
+			writer.close();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		*/
 	}
 	
 	public void onFrame(Controller controller) {
